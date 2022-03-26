@@ -4,3 +4,10 @@ main: me.equaferrous.customdaylength.CustomDayLength
 api-version: 1.18
 authors: [ EquaFerrous ]
 description: A plugin to manually set how long the day or night lasts.
+commands:
+  startcustomtime:
+    description: Your description
+    usage: /<command>
+  stopcustomtime:
+    description: Your description
+    usage: /<command>
