@@ -11,3 +11,6 @@ commands:
   stopcustomtime:
     description: Your description
     usage: /<command>
+  setdaylength:
+    description: Your description
+    usage: /<command> <value> <x / ticks>

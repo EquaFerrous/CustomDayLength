@@ -1,5 +1,6 @@
 package me.equaferrous.customdaylength;
 
+import me.equaferrous.customdaylength.commands.SetDayLength;
 import me.equaferrous.customdaylength.commands.StartPlugin;
 import me.equaferrous.customdaylength.commands.StopPlugin;
 import me.equaferrous.customdaylength.timemanager.TimeManager;
@@ -15,6 +16,7 @@ public final class CustomDayLength extends JavaPlugin {
     public void onEnable() {
         this.getCommand("startcustomtime").setExecutor(new StartPlugin());
         this.getCommand("stopcustomtime").setExecutor(new StopPlugin());
+        this.getCommand("setdaylength").setExecutor(new SetDayLength());
 
         new TimeManager();
 
