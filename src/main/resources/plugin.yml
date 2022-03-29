@@ -5,12 +5,12 @@ api-version: 1.18
 authors: [ EquaFerrous ]
 description: A plugin to manually set how long the day or night lasts.
 commands:
-  startcustomtime:
+  enablecustomtime:
     description: Your description
     usage: /<command>
-  stopcustomtime:
+  disablecustomtime:
     description: Your description
     usage: /<command>
-  setdaylength:
+  setcustomtime:
     description: Your description
-    usage: /<command> <value> <x / ticks>
+    usage: /<command> <day/night/full> <value>

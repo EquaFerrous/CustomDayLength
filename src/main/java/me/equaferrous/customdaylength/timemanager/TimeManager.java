@@ -11,27 +11,22 @@ import java.math.BigInteger;
 
 public class TimeManager {
 
-    /*
-    private int defaultNightLength = 12000;
-
-    private int customNightLength = defaultNightLength;
-
-    private int minCustomLength = 100;*/
-
     private static TimeManager instance;
 
-
-
-    private long currentTime;
     private int dayAdvanceAmount = 1;
-    private int timeAdvanceDelay = 1;
+    private int dayAdvanceDelay = 1;
+    private int nightAdvanceAmount = 1;
+    private int nightAdvanceDelay = 1;
 
-    private int defaultDayLength = 24000;
-    private int customDayLength;
+    private final int defaultDayLength = 12000;
+    private final int defaultNightLength = 12000;
+    private int customDayLength = defaultDayLength;
+    private int customNightLength = defaultNightLength;
 
-    private World overworld;
-    private BukkitTask advanceTimeTask;
-    private boolean running;
+    private final World overworld;
+    private BukkitTask currentTask;
+    private boolean enabled;
+    private boolean nightValues;
 
     // ----------------------------------------------
 
@@ -39,8 +34,7 @@ public class TimeManager {
         instance = this;
 
         overworld = Bukkit.getWorlds().get(0);
-        customDayLength = defaultDayLength;
-        running = false;
+        enabled = false;
     }
 
     // ------------------------------------------------
@@ -51,80 +45,170 @@ public class TimeManager {
 
     // -------------------------------------------------
 
-    // Starts the custom time script
-    public void StartCustomRunning() {
-        if (running) {
-            StopCustomRunning();
-        }
-
-        currentTime = overworld.getTime();
+    // Enables the use of custom time
+    public void EnableCustomTime() {
+        enabled = true;
         overworld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        running = true;
-        Bukkit.broadcastMessage(ChatColor.GRAY +"Custom time on at "+ dayAdvanceAmount +"/"+ timeAdvanceDelay);
-
-        advanceTimeTask = Bukkit.getScheduler().runTaskTimer(CustomDayLength.getPlugin(CustomDayLength.class), this::AdvanceTime, 0, timeAdvanceDelay);
+        StartCustomTime();
     }
 
-    // Stops the custom time script, reverting to default time
-    public void StopCustomRunning() {
-        if (advanceTimeTask != null) {
-            advanceTimeTask.cancel();
-            advanceTimeTask = null;
-        }
-        running = false;
+    // Disables the use of custom time
+    public void DisableCustomTime() {
+        enabled = false;
+        StopCurrentTask();
         overworld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
-        Bukkit.broadcastMessage(ChatColor.GRAY +"Custom time off");
     }
 
-    // Sets a new day length as a multiplier of the default length
-    public void SetDayLengthMultiplier(double lengthMultiplier) {
-        if (lengthMultiplier == 1.0) {
-            StopCustomRunning();
-            return;
-        }
+    // Sets a new day length
+    public void SetDayLength(double minutes) {
+        customDayLength = (int) (minutes * 60 * 20);
+        UpdateDayValues();
 
-        double newLength = defaultDayLength * lengthMultiplier;
-        double speedMultiplier = defaultDayLength / newLength;
-        int[] newTickValues = GetCustomTickValues(speedMultiplier);
-        dayAdvanceAmount = newTickValues[0];
-        timeAdvanceDelay = newTickValues[1];
+        StartCustomTime();
+    }
 
-        StartCustomRunning();
+    // Sets a new night length
+    public void SetNightLength(double minutes) {
+        customNightLength = (int) (minutes * 60 * 20);
+        UpdateNightValues();
+
+        StartCustomTime();
+    }
+
+    // Sets a new full-day length
+    public void SetFullDayLength(double minutes) {
+        customDayLength = (int) ((minutes / 2) * 60 * 20);
+        customNightLength = (int) ((minutes / 2) * 60 * 20);
+        UpdateDayValues();
+        UpdateNightValues();
+
+        StartCustomTime();
     }
 
     // ------------------------------------------------------
 
+    // Starts the custom time script
+    private void StartCustomTime() {
+        if (!enabled) {
+            return;
+        }
+
+        StopCurrentTask();
+
+        int advanceDelay;
+        int advanceTime;
+        if (!CheckIfNight()) {
+            advanceDelay = dayAdvanceDelay;
+            advanceTime = dayAdvanceAmount;
+            nightValues = false;
+        }
+        else {
+            advanceDelay = nightAdvanceDelay;
+            advanceTime = nightAdvanceAmount;
+            nightValues = true;
+        }
+
+        if (advanceTime == 1 && advanceDelay == 1) {
+            StartDefaultTime();
+            return;
+        }
+
+        Bukkit.broadcastMessage(ChatColor.GRAY +"[DEBUG] Custom time on at "+ advanceTime +"/"+ advanceDelay);
+        currentTask = Bukkit.getScheduler().runTaskTimer(CustomDayLength.getPlugin(CustomDayLength.class), this::AdvanceTime, 0, advanceDelay);
+    }
+
+    // Stops the current task script
+    private void StopCurrentTask() {
+        if (currentTask == null) {
+            return;
+        }
+        currentTask.cancel();
+        currentTask = null;
+        Bukkit.broadcastMessage(ChatColor.GRAY +"[DEBUG] Custom time off");
+    }
+
+    // Starts default time
+    private void StartDefaultTime() {
+        overworld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+        currentTask = Bukkit.getScheduler().runTaskTimer(CustomDayLength.getPlugin(CustomDayLength.class), this::CheckDefaultTime, 0, 20);
+    }
+
+    // Stops default time
+    private void StopDefaultTime() {
+        StopCurrentTask();
+        overworld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+
+        StartCustomTime();
+    }
+
+    // Check when default time has ended
+    private void CheckDefaultTime() {
+        if (CheckForTimeChange()) {
+            StopDefaultTime();
+        }
+    }
+
+    // Advances the time artificially from normal gameplay
     private void AdvanceTime() {
-        currentTime += dayAdvanceAmount;
+        int advanceAmount;
+        if (nightValues) {
+            advanceAmount = nightAdvanceAmount;
+        } else {
+            advanceAmount = dayAdvanceAmount;
+        }
+
+        long currentTime = overworld.getTime();
+        currentTime += advanceAmount;
 
         if (currentTime >= 24000) {
             currentTime -= 24000;
         }
 
         overworld.setTime(currentTime);
+
+        if (CheckForTimeChange()) {
+            StartCustomTime();
+        }
     }
 
-    // Gets new tick values for a given multiplier - Returns [advanceAmount, advanceDelay]
-    private int[] GetCustomTickValues(double speedMultiplier) {
-        BigInteger numerator = BigInteger.valueOf((long) (speedMultiplier * 10));
-        int gcd = numerator.gcd(BigInteger.TEN).intValue();
+    // Gets new tick values for a given day speed multiplier
+    private void UpdateDayValues() {
+        double speedMultiplier = (double) defaultDayLength / (double) customDayLength;
 
-        return new int[]{numerator.intValue() / gcd, 10 / gcd};
+        int[] tickValues = DecimalToFraction((long) speedMultiplier);
+        dayAdvanceAmount = tickValues[0];
+        dayAdvanceDelay = tickValues[1];
     }
 
-    // -----------------------------------------------
+    // Gets new tick values for a given night speed multiplier
+    private void UpdateNightValues() {
+        double speedMultiplier = (double) defaultNightLength / (double) customNightLength;
 
-
-    /*
-    public void SetDayTickLength(int tickLength) {
-        customDayLength = Math.max(minCustomLength, tickLength);
+        int[] tickValues = DecimalToFraction((long) speedMultiplier);
+        nightAdvanceAmount = tickValues[0];
+        nightAdvanceDelay = tickValues[1];
     }
 
-    private void SetNightTickLength(int tickLength) {
-        customNightLength = Math.max(minCustomLength, tickLength);
+    // Get the fractional parts of a decimal
+    private int[] DecimalToFraction(long decimal) {
+        String decimalText = Double.toString(Math.abs(decimal));
+        int integerPlaces = decimalText.indexOf('.');
+        int decimalPlaces = decimalText.length() - integerPlaces - 1;
+        long powerTen = (long) Math.pow(10, decimalPlaces);
+
+        BigInteger numerator = BigInteger.valueOf(decimal * powerTen);
+        int gcd = numerator.gcd(BigInteger.valueOf(powerTen)).intValue();
+
+        return new int[]{numerator.intValue() / gcd, (int) (powerTen / gcd)};
     }
 
-    private void SetNightLengthMultiplier(float multiplier) {
-        customNightLength = (int) (defaultNightLength * multiplier);
-    }*/
+    // Returns if it is currently night
+    private boolean CheckIfNight() {
+        return (overworld.getTime() > 12000);
+    }
+
+    // Returns whether the time has changed between day / night
+    private boolean CheckForTimeChange() {
+        return (CheckIfNight() != nightValues);
+    }
 }

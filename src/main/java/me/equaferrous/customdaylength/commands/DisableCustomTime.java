@@ -7,14 +7,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class StopPlugin implements CommandExecutor {
+public class DisableCustomTime implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        if (command.getName().equalsIgnoreCase("stopcustomtime")) {
-            TimeManager.GetInstance().StopCustomRunning();
-            Bukkit.broadcastMessage(ChatColor.GRAY + "[DEBUG] Custom time stopped");
+        if (command.getName().equalsIgnoreCase("disablecustomtime")) {
+            sender.sendMessage(ChatColor.GRAY + "Custom Time Plugin disabled.");
+            TimeManager.GetInstance().DisableCustomTime();
+
         }
 
         return true;
