@@ -13,8 +13,10 @@ public class EnableCustomTime implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (command.getName().equalsIgnoreCase("enablecustomtime")) {
-            sender.sendMessage(ChatColor.GRAY + "Custom Time Plugin enabled.");
             TimeManager.GetInstance().EnableCustomTime();
+
+            sender.sendMessage(ChatColor.GRAY + "Custom Time Plugin enabled.");
+            TimeManager.GetInstance().PrintTimeInfo(sender);
         }
 
         return true;

@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigInteger;
@@ -13,15 +14,15 @@ public class TimeManager {
 
     private static TimeManager instance;
 
-    private int dayAdvanceAmount = 1;
-    private int dayAdvanceDelay = 1;
-    private int nightAdvanceAmount = 1;
-    private int nightAdvanceDelay = 1;
+    private int dayAdvanceAmount;
+    private int dayAdvanceDelay;
+    private int nightAdvanceAmount;
+    private int nightAdvanceDelay;
 
     private final int defaultDayLength = 12000;
     private final int defaultNightLength = 12000;
-    private int customDayLength = defaultDayLength;
-    private int customNightLength = defaultNightLength;
+    private int customDayLength;
+    private int customNightLength;
 
     private final World overworld;
     private BukkitTask currentTask;
@@ -35,6 +36,7 @@ public class TimeManager {
 
         overworld = Bukkit.getWorlds().get(0);
         enabled = false;
+        ResetLengths();
     }
 
     // ------------------------------------------------
@@ -83,6 +85,30 @@ public class TimeManager {
         UpdateNightValues();
 
         StartCustomTime();
+    }
+
+    // Resets the day / night length to default
+    public void ResetLengths() {
+        customDayLength = defaultDayLength;
+        customNightLength = defaultNightLength;
+        UpdateDayValues();
+        UpdateNightValues();
+
+        StartCustomTime();
+    }
+
+    // Prints info text based of the current time values
+    public void PrintTimeInfo(CommandSender recipient) {
+        String text = "";
+        double dayLength = ((double) customDayLength / 20) / 60;
+        //double standardDay = ((double) defaultDayLength / 20) / 60;
+        double nightLength = ((double) customNightLength / 20) / 60;
+        //double standardNight = ((double) defaultNightLength / 20) / 60;
+
+        text += "[ Day length : "+ dayLength +" minutes ]";
+        text += "\n[ Night length : "+ nightLength +" minutes ]";
+
+        recipient.sendMessage(ChatColor.GRAY + text);
     }
 
     // ------------------------------------------------------

@@ -34,8 +34,8 @@ public class SetCustomTime implements CommandExecutor {
                 value = Math.floor(value * 100) / 100;
                 TimeManager.GetInstance().SetFullDayLength(value);
 
-                double realTime = Math.floor((20 / value) * 10) / 10;
-                sender.sendMessage(ChatColor.GRAY +"Full day length set to "+ value +" minutes. ("+ realTime +"x default).");
+                sender.sendMessage(ChatColor.GRAY +"Set custom full-day length.");
+                TimeManager.GetInstance().PrintTimeInfo(sender);
             }
 
             else if (option.equalsIgnoreCase("day")) {
@@ -46,9 +46,8 @@ public class SetCustomTime implements CommandExecutor {
                 value = Math.floor(value * 100) / 100;
                 TimeManager.GetInstance().SetDayLength(value);
 
-                double realTime = Math.floor((10 / value) * 10) / 10;
-                sender.sendMessage(ChatColor.GRAY +"Day length set to "+ value +" minutes. ("+ realTime +"x default).");
-                return true;
+                sender.sendMessage(ChatColor.GRAY +"Set custom day length.");
+                TimeManager.GetInstance().PrintTimeInfo(sender);
             }
 
             else if (option.equalsIgnoreCase("night")) {
@@ -59,17 +58,16 @@ public class SetCustomTime implements CommandExecutor {
                 value = Math.floor(value * 100) / 100;
                 TimeManager.GetInstance().SetNightLength(value);
 
-                double realTime = Math.floor((10 / value) * 10) / 10;
-                sender.sendMessage(ChatColor.GRAY +"Night length set to "+ value +" minutes. ("+ realTime +"x default).");
-                return true;
+                sender.sendMessage(ChatColor.GRAY +"Set custom night length.");
+                TimeManager.GetInstance().PrintTimeInfo(sender);
             }
 
             else {
                 sender.sendMessage(ChatColor.RED +"Options for command are 'day' or 'night' or 'full'.");
-                return true;
             }
 
         }
         return true;
     }
+
 }
