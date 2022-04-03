@@ -13,7 +13,7 @@ public class SetCustomTime implements CommandExecutor {
 
         if (command.getName().equalsIgnoreCase("setcustomtime")) {
             if (args.length != 2) {
-                sender.sendMessage(ChatColor.RED +"/setcustomtime <day/night/full> <minutes>");
+                sender.sendMessage(ChatColor.RED +"Incorrect command. Correct usage -->\n/SetCustomTime (day | night | full) <minutes>");
                 return true;
             }
 
@@ -25,49 +25,61 @@ public class SetCustomTime implements CommandExecutor {
                 return true;
             }
 
+            if (GetDecimalPlaces(value) > 2) {
+                sender.sendMessage(ChatColor.RED +"Inputted value for <minutes> can have no more than 2 decimal places.");
+                return true;
+            }
+
+            
+            TimeManager timeManager = TimeManager.GetInstance();
             String option = args[0];
             if (option.equalsIgnoreCase("full")) {
-                if (value < 1) {
-                    sender.sendMessage(ChatColor.RED +"Full day length can not be less than 1 minute.");
+                if (value < 0.1) {
+                    sender.sendMessage(ChatColor.RED +"Full day length can not be less than 0.1 minutes (6 seconds).");
                     return true;
                 }
-                value = Math.floor(value * 100) / 100;
-                TimeManager.GetInstance().SetFullDayLength(value);
 
+                timeManager.SetFullDayLength(value);
                 sender.sendMessage(ChatColor.GRAY +"Set custom full-day length.");
-                TimeManager.GetInstance().PrintTimeInfo(sender);
+                timeManager.PrintTimeInfo(sender);
             }
 
             else if (option.equalsIgnoreCase("day")) {
-                if (value < 0.5) {
-                    sender.sendMessage(ChatColor.RED +"Day length can not be less than 0.5 minutes (30 seconds).");
+                if (value < 0.05) {
+                    sender.sendMessage(ChatColor.RED +"Day length can not be less than 0.05 minutes (3 seconds).");
                     return true;
                 }
-                value = Math.floor(value * 100) / 100;
-                TimeManager.GetInstance().SetDayLength(value);
 
+                timeManager.SetDayLength(value);
                 sender.sendMessage(ChatColor.GRAY +"Set custom day length.");
-                TimeManager.GetInstance().PrintTimeInfo(sender);
+                timeManager.PrintTimeInfo(sender);
             }
 
             else if (option.equalsIgnoreCase("night")) {
-                if (value < 0.5) {
-                    sender.sendMessage(ChatColor.RED +"Night length can not be less than 0.5 minutes (30 seconds).");
+                if (value < 0.05) {
+                    sender.sendMessage(ChatColor.RED +"Night length can not be less than 0.05 minutes (3 seconds).");
                     return true;
                 }
-                value = Math.floor(value * 100) / 100;
-                TimeManager.GetInstance().SetNightLength(value);
 
+                timeManager.SetNightLength(value);
                 sender.sendMessage(ChatColor.GRAY +"Set custom night length.");
-                TimeManager.GetInstance().PrintTimeInfo(sender);
+                timeManager.PrintTimeInfo(sender);
             }
 
             else {
-                sender.sendMessage(ChatColor.RED +"Options for command are 'day' or 'night' or 'full'.");
+                sender.sendMessage(ChatColor.RED +"Must choose an option from (day|night|full).");
             }
 
         }
         return true;
+    }
+
+
+    // Returns the number of decimal places of a number
+    private int GetDecimalPlaces(double decimal) {
+        String decimalText = Double.toString(Math.abs(decimal));
+        String[] splitText = decimalText.split("\\.");
+        return splitText[1].length();
     }
 
 }

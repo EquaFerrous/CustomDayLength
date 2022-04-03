@@ -12,11 +12,19 @@ public class ResetCustomTime implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (command.getName().equalsIgnoreCase("resetcustomtime")) {
-            TimeManager.GetInstance().ResetLengths();
+            if (args.length != 0) {
+                sender.sendMessage(ChatColor.RED +"Incorrect command. Correct usage -->\n/ResetCustomTime");
+                return true;
+            }
 
+
+            TimeManager timeManager = TimeManager.GetInstance();
+
+            timeManager.ResetLengths();
             sender.sendMessage(ChatColor.GRAY + "Custom Time Plugin reset.");
-            TimeManager.GetInstance().PrintTimeInfo(sender);
+            timeManager.PrintTimeInfo(sender);
         }
+
         return true;
     }
 }
