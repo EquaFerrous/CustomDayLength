@@ -115,6 +115,22 @@ public class TimeManager {
         recipient.sendMessage(ChatColor.GRAY + text);
     }
 
+    // Skips an amount of time caused by an external source
+    public void SkipTime(long skipAmount) {
+        long fullTime = overworld.getFullTime();
+        fullTime += skipAmount;
+        overworld.setFullTime(fullTime);
+
+        currentTime = overworld.getTime();
+        AdvanceTime();
+        Bukkit.broadcastMessage(String.valueOf(skipAmount));
+        Bukkit.broadcastMessage("Time skipped "+ currentTime);
+    }
+
+    public boolean GetIfEnabled() {
+        return enabled;
+    }
+
     // ------------------------------------------------------
 
     // Starts the custom time script
@@ -166,8 +182,6 @@ public class TimeManager {
     private void StopDefaultTime() {
         StopCurrentTask();
         overworld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-
-        StartCustomTime();
     }
 
     // Check when default time has ended
@@ -175,6 +189,7 @@ public class TimeManager {
         currentTime = overworld.getTime();
         if (CheckForTimeChange()) {
             StopDefaultTime();
+            StartCustomTime();
         }
     }
 
@@ -190,7 +205,7 @@ public class TimeManager {
         currentTime += advanceAmount;
 
         if (currentTime >= 24000) {
-            currentTime -= 24000;
+            currentTime %= 24000;
         }
 
         long roundedTime = Math.round(currentTime);
