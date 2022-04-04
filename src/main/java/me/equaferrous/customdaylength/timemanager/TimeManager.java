@@ -8,7 +8,6 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.math.BigInteger;
 
 public class TimeManager {
 
@@ -83,8 +82,6 @@ public class TimeManager {
         double nightRatio = (double) defaultNightLength / 24000;
         customDayLength = (int) ((minutes * 60 * 20) * dayRatio);
         customNightLength = (int) ((minutes * 60 * 20) * nightRatio);
-        Bukkit.broadcastMessage(String.valueOf(customDayLength));
-        Bukkit.broadcastMessage(String.valueOf(customNightLength));
         UpdateDayValues();
         UpdateNightValues();
 
@@ -105,14 +102,16 @@ public class TimeManager {
     public void PrintTimeInfo(CommandSender recipient) {
         String text = "";
         double dayLength = ((double) customDayLength / 20) / 60;
-        //double standardDay = ((double) defaultDayLength / 20) / 60;
         double nightLength = ((double) customNightLength / 20) / 60;
-        //double standardNight = ((double) defaultNightLength / 20) / 60;
 
         text += "[ Day length : "+ GetMinutesSeconds(dayLength) +" ]";
         text += "\n[ Night length : "+ GetMinutesSeconds(nightLength) +" ]";
 
         recipient.sendMessage(ChatColor.GRAY + text);
+
+        if (!enabled) {
+            recipient.sendMessage(ChatColor.RED + "Changes will not take effect until the plugin is enabled -->\n/EnableCustomTime");
+        }
     }
 
     // Skips an amount of time caused by an external source
@@ -123,8 +122,6 @@ public class TimeManager {
 
         currentTime = overworld.getTime();
         AdvanceTime();
-        Bukkit.broadcastMessage(String.valueOf(skipAmount));
-        Bukkit.broadcastMessage("Time skipped "+ currentTime);
     }
 
     public boolean GetIfEnabled() {
@@ -158,7 +155,6 @@ public class TimeManager {
             return;
         }
 
-        Bukkit.broadcastMessage(ChatColor.GRAY +"[DEBUG] Custom time on at "+ advanceTime +"x");
         currentTask = Bukkit.getScheduler().runTaskTimer(CustomDayLength.getPlugin(CustomDayLength.class), this::AdvanceTime, 0, 1);
     }
 
@@ -169,7 +165,6 @@ public class TimeManager {
         }
         currentTask.cancel();
         currentTask = null;
-        Bukkit.broadcastMessage(ChatColor.GRAY +"[DEBUG] Custom time off");
     }
 
     // Starts default time

@@ -22,14 +22,10 @@ public final class CustomDayLength extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TimeSkip(), this);
 
         new TimeManager();
-
-        Bukkit.getServer().getConsoleSender().sendMessage("Custom Day Length -- Enabled");
     }
 
     @Override
     public void onDisable() {
         TimeManager.GetInstance().DisableCustomTime();
-
-        Bukkit.getServer().getConsoleSender().sendMessage("Custom Day Length -- Disabled");
     }
 }
