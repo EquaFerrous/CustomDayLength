@@ -6,14 +6,14 @@ authors: [ EquaFerrous ]
 description: A plugin to manually set how long the day or night lasts.
 commands:
   enablecustomtime:
-    description: Your description
+    description: Enables the plugin.
     usage: /<command>
   disablecustomtime:
-    description: Your description
+    description: Disables the plugin.
     usage: /<command>
   setcustomtime:
-    description: Your description
-    usage: /<command> <day/night/full> <value>
+    description: Sets the day/night/full-day length.
+    usage: /<command> (day|night|full) <minutes>
   resetcustomtime:
-    description: Your description
+    description: Resets custom lengths to default.
     usage: /<command>
