@@ -13,8 +13,13 @@ public class DisableCustomTime implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (command.getName().equalsIgnoreCase("disablecustomtime")) {
-            TimeManager.GetInstance().DisableCustomTime();
+            if (args.length != 0) {
+                sender.sendMessage(ChatColor.RED +"Incorrect command. Correct usage -->\n/DisableCustomTime");
+                return true;
+            }
 
+
+            TimeManager.GetInstance().DisableCustomTime();
             sender.sendMessage(ChatColor.GRAY + "Custom Time Plugin disabled.");
         }
 
